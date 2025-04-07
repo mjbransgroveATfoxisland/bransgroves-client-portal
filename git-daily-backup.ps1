@@ -2,8 +2,8 @@
 
 # Check for uncommitted changes
 if (git status --porcelain) {
-    \ = Get-Date -Format "yyyy-MM-dd HH:mm"
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm"
     git add .
-    git commit -m "Automated daily backup: \"
+    git commit -m "Automated daily backup: $timestamp"
     git push origin main
 }
