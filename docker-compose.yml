@@ -1,41 +1,39 @@
 version: "3.9"
 
 services:
-  backend:
-    build:
-      context: ./backend
-    container_name: brans-backend
-    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
-    volumes:
-      - ./backend:/app
-    ports:
-      - "8000:8000"
-    env_file:
-      - ./backend/.env
-    depends_on:
-      - db
-
-  frontend:
-    build:
-      context: ./frontend
-    container_name: brans-frontend
-    volumes:
-      - ./frontend:/app
-    ports:
-      - "5173:5173"
-    command: sh -c "npm install && npm run dev"
-
   db:
-    image: postgres:15
-    container_name: brans-db
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+    image: postgres:latest
     environment:
-      POSTGRES_DB: brans_db
-      POSTGRES_USER: brans_user
+      POSTGRES_DB: bransgroves_portal
+      POSTGRES_USER: user
       POSTGRES_PASSWORD: secretpassword
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    environment:
+      DATABASE_URL: postgres://user:secretpassword@db:5432/bransgroves_portal
+      REDIS_URL: redis://redis:6379/0
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
 
 volumes:
   postgres_data:
